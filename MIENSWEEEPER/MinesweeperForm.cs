@@ -87,6 +87,11 @@ class MinesweeperGame : Form
         parent.Add(item);
     }
 
+    public void AddStripSplit(ToolStripItemCollection parent)
+    {
+        parent.Add(new ToolStripSeparator());
+    }
+
     public void SetLevel(Level level)
     {
         bombCount = level.Bombs;
@@ -109,9 +114,16 @@ class MinesweeperGame : Form
 
         // file category
         {
-            ToolStripMenuItem parent = new ToolStripMenuItem() { Text = "File" };
+            ToolStripMenuItem parent = new ToolStripMenuItem() { Text = "Game" };
 
             AddStripItem(parent.DropDownItems, "Reset", () => { ResetGame(); });
+
+            AddStripSplit(parent.DropDownItems);
+            AddStripItem(parent.DropDownItems, "Beginner", () => { SetLevel(MinesweeperLevels.Get().Beginner); });
+            AddStripItem(parent.DropDownItems, "Intermediate", () => { SetLevel(MinesweeperLevels.Get().Intermediate); });
+            AddStripItem(parent.DropDownItems, "Expert", () => { SetLevel(MinesweeperLevels.Get().Expert); });
+
+            AddStripSplit(parent.DropDownItems);
             AddStripItem(parent.DropDownItems, "Exit", () => { Application.Exit(); });
 
             GameStrip.Items.Add(parent);
@@ -120,10 +132,6 @@ class MinesweeperGame : Form
         // levels category
         {
             ToolStripMenuItem parent = new ToolStripMenuItem() { Text = "Levels" };
-
-            AddStripItem(parent.DropDownItems, "Beginner", () => { SetLevel(MinesweeperLevels.Get().Beginner); });
-            AddStripItem(parent.DropDownItems, "Intermediate", () => { SetLevel(MinesweeperLevels.Get().Intermediate); });
-            AddStripItem(parent.DropDownItems, "Expert", () => { SetLevel(MinesweeperLevels.Get().Expert); });
 
             GameStrip.Items.Add(parent);
         }
