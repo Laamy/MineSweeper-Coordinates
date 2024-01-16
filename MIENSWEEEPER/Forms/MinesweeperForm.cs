@@ -16,6 +16,9 @@ class MinesweeperGame : Form
     private Panel GameRenderer;
     private MenuStrip GameStrip;
 
+    private Image flagImage = MIENSWEEEPER.Properties.Resources.flag;
+    private Image bombImage = MIENSWEEEPER.Properties.Resources.bomb;
+
     public MinesweeperGame()
     {
         InitializeUI();
@@ -105,7 +108,10 @@ class MinesweeperGame : Form
                 if (revealed[x, y])
                 {
                     if (bombs[x, y])
+                    {
                         g.FillRectangle(Brushes.Red, cellRect);
+                        g.DrawImage(bombImage, cellRect);
+                    }
                     else
                     {
                         int adjacentBombs = CountAdjacentBombs(x, y);
@@ -115,8 +121,8 @@ class MinesweeperGame : Form
                 }
                 else if (flagged[x, y])
                 {
-                    g.FillRectangle(Brushes.Black, cellRect);
-                    g.DrawString(coordinates, Font, Brushes.White, cellRect, new StringFormat { LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Center });
+                    g.FillRectangle(Brushes.Gray, cellRect);
+                    g.DrawImage(flagImage, cellRect);
                 }
                 else
                 {
