@@ -18,8 +18,8 @@ class MinesweeperGame : Form
     private Panel GameRenderer;
     private MenuStrip GameStrip;
 
-    private Image flagImage = GameEndpoint.Properties.Resources.flag;
-    private Image bombImage = GameEndpoint.Properties.Resources.bomb;
+    private Image flagImage = Minesweeper.Properties.Resources.flag;
+    private Image bombImage = Minesweeper.Properties.Resources.bomb;
 
     public MinesweeperGame()
     {

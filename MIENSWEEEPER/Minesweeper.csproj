@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{5C3D4AEE-21CE-46E5-BE85-EA8C2D6C988C}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>MIENSWEEEPER</RootNamespace>
-    <AssemblyName>MIENSWEEEPER</AssemblyName>
+    <RootNamespace>Minesweeper</RootNamespace>
+    <AssemblyName>Minesweeper</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -38,7 +38,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Forms\MinesweeperForm.cs">
+    <Compile Include="MinesweeperForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Program.cs" />
@@ -63,6 +63,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\bomb.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Forms\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
