@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 class MinesweeperGame : Form
@@ -8,7 +7,7 @@ class MinesweeperGame : Form
     private const int cellSize = 30;
     private const int gridSizeX = 10;
     private const int gridSizeY = 10;
-    private const int bombCount = 14;
+    private const int bombCount = 9;
 
     private bool[,] bombs;
     private bool[,] revealed;
@@ -19,8 +18,8 @@ class MinesweeperGame : Form
     private Panel GameRenderer;
     private MenuStrip GameStrip;
 
-    private Image flagImage = MIENSWEEEPER.Properties.Resources.flag;
-    private Image bombImage = MIENSWEEEPER.Properties.Resources.bomb;
+    private Image flagImage = GameEndpoint.Properties.Resources.flag;
+    private Image bombImage = GameEndpoint.Properties.Resources.bomb;
 
     public MinesweeperGame()
     {
@@ -143,7 +142,7 @@ class MinesweeperGame : Form
                 }
                 else
                 {
-                    g.FillRectangle(Brushes.Gray, cellRect);
+                    g.FillRectangle(new SolidBrush(Color.FromArgb(150, 150, 150)), cellRect);
                     g.DrawString(coordinates, Font, Brushes.Black, cellRect, new StringFormat { LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Center });
                 }
 

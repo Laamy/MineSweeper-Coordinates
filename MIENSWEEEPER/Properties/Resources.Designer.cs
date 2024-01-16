@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace MIENSWEEEPER.Properties {
+namespace GameEndpoint.Properties {
     using System;
     
     
