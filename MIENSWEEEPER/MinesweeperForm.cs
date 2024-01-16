@@ -87,6 +87,15 @@ class MinesweeperGame : Form
         parent.Add(item);
     }
 
+    public void SetLevel(Level level)
+    {
+        bombCount = level.Bombs;
+        gridSizeX = level.GridX;
+        gridSizeY = level.GridY;
+
+        ResetGame();
+    }
+
     private void InitializeUI()
     {
         Text = "Minesweeper";
@@ -106,37 +115,13 @@ class MinesweeperGame : Form
             ToolStripMenuItem parent = new ToolStripMenuItem() { Text = "Levels" };
 
             // beginner level
-            AddStripItem(parent.DropDownItems, "Beginner", () => {
-                Level level = MinesweeperLevels.Get().Beginner;
-
-                bombCount = level.Bombs;
-                gridSizeX = level.GridX;
-                gridSizeY = level.GridY;
-
-                ResetGame();
-            });
+            AddStripItem(parent.DropDownItems, "Beginner", () => { SetLevel(MinesweeperLevels.Get().Beginner); });
 
             // intermediate level
-            AddStripItem(parent.DropDownItems, "Intermediate", () => {
-                Level level = MinesweeperLevels.Get().Intermediate;
-
-                bombCount = level.Bombs;
-                gridSizeX = level.GridX;
-                gridSizeY = level.GridY;
-
-                ResetGame();
-            });
+            AddStripItem(parent.DropDownItems, "Intermediate", () => { SetLevel(MinesweeperLevels.Get().Intermediate); });
 
             // expert level
-            AddStripItem(parent.DropDownItems, "Expert", () => {
-                Level level = MinesweeperLevels.Get().Expert;
-
-                bombCount = level.Bombs;
-                gridSizeX = level.GridX;
-                gridSizeY = level.GridY;
-
-                ResetGame();
-            });
+            AddStripItem(parent.DropDownItems, "Expert", () => { SetLevel(MinesweeperLevels.Get().Expert); });
 
             GameStrip.Items.Add(parent);
         }
