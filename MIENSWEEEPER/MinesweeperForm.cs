@@ -129,13 +129,6 @@ class MinesweeperGame : Form
             GameStrip.Items.Add(parent);
         }
 
-        // levels category
-        {
-            ToolStripMenuItem parent = new ToolStripMenuItem() { Text = "Levels" };
-
-            GameStrip.Items.Add(parent);
-        }
-
         // score/bombs left counter
         BombsLeftDisplay = new ToolStripMenuItem()
         {
