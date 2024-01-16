@@ -2,12 +2,14 @@
 using System.Drawing;
 using System.Windows.Forms;
 
+using Image = System.Drawing.Image;
+
 class MinesweeperGame : Form
 {
     private const int cellSize = 30;
-    private const int gridSizeX = 10;
-    private const int gridSizeY = 10;
-    private const int bombCount = 9;
+    private int gridSizeX = 10;
+    private int gridSizeY = 10;
+    private int bombCount = 9;
 
     private bool[,] bombs;
     private bool[,] revealed;
@@ -76,13 +78,13 @@ class MinesweeperGame : Form
         GameRenderer.Invalidate();
     }
 
-    public void AddStripItem(string text, Action click)
+    public void AddStripItem(ToolStripItemCollection parent, string text, Action click)
     {
-        ToolStripMenuItem item = new ToolStripMenuItem() { Text = "Reset" };
+        ToolStripMenuItem item = new ToolStripMenuItem() { Text = text };
 
         item.Click += delegate { click(); };
 
-        GameStrip.Items.Add(item);
+        parent.Add(item);
     }
 
     private void InitializeUI()
@@ -96,8 +98,50 @@ class MinesweeperGame : Form
         GameStrip = new MenuStrip();
         Controls.Add(GameStrip);
 
-        AddStripItem("Reset", () => { ResetGame(); });
+        // reset button
+        AddStripItem(GameStrip.Items, "Reset", () => { ResetGame(); });
 
+        // levels category
+        {
+            ToolStripMenuItem parent = new ToolStripMenuItem() { Text = "Levels" };
+
+            // beginner level
+            AddStripItem(parent.DropDownItems, "Beginner", () => {
+                Level level = MinesweeperLevels.Get().Beginner;
+
+                bombCount = level.Bombs;
+                gridSizeX = level.GridX;
+                gridSizeY = level.GridY;
+
+                ResetGame();
+            });
+
+            // intermediate level
+            AddStripItem(parent.DropDownItems, "Intermediate", () => {
+                Level level = MinesweeperLevels.Get().Intermediate;
+
+                bombCount = level.Bombs;
+                gridSizeX = level.GridX;
+                gridSizeY = level.GridY;
+
+                ResetGame();
+            });
+
+            // expert level
+            AddStripItem(parent.DropDownItems, "Expert", () => {
+                Level level = MinesweeperLevels.Get().Expert;
+
+                bombCount = level.Bombs;
+                gridSizeX = level.GridX;
+                gridSizeY = level.GridY;
+
+                ResetGame();
+            });
+
+            GameStrip.Items.Add(parent);
+        }
+
+        // score/bombs left counter
         BombsLeftDisplay = new ToolStripMenuItem()
         {
             Text = "9",
