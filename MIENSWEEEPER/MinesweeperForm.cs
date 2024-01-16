@@ -107,20 +107,22 @@ class MinesweeperGame : Form
         GameStrip = new MenuStrip();
         Controls.Add(GameStrip);
 
-        // reset button
-        AddStripItem(GameStrip.Items, "Reset", () => { ResetGame(); });
+        // file category
+        {
+            ToolStripMenuItem parent = new ToolStripMenuItem() { Text = "File" };
+
+            AddStripItem(parent.DropDownItems, "Reset", () => { ResetGame(); });
+            AddStripItem(parent.DropDownItems, "Exit", () => { Application.Exit(); });
+
+            GameStrip.Items.Add(parent);
+        }
 
         // levels category
         {
             ToolStripMenuItem parent = new ToolStripMenuItem() { Text = "Levels" };
 
-            // beginner level
             AddStripItem(parent.DropDownItems, "Beginner", () => { SetLevel(MinesweeperLevels.Get().Beginner); });
-
-            // intermediate level
             AddStripItem(parent.DropDownItems, "Intermediate", () => { SetLevel(MinesweeperLevels.Get().Intermediate); });
-
-            // expert level
             AddStripItem(parent.DropDownItems, "Expert", () => { SetLevel(MinesweeperLevels.Get().Expert); });
 
             GameStrip.Items.Add(parent);
