@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 class MinesweeperGame : Form
@@ -7,11 +8,13 @@ class MinesweeperGame : Form
     private const int cellSize = 30;
     private const int gridSizeX = 10;
     private const int gridSizeY = 10;
-    private const int bombCount = 9;
+    private const int bombCount = 14;
 
     private bool[,] bombs;
     private bool[,] revealed;
     private bool[,] flagged;
+
+    private int bombsLeft;
 
     private Panel GameRenderer;
     private MenuStrip GameStrip;
@@ -43,6 +46,9 @@ class MinesweeperGame : Form
         Array.Clear(flagged, 0, flagged.Length);
         Array.Clear(bombs, 0, bombs.Length);
 
+        bombsLeft = bombCount;
+        BombsLeftDisplay.Text = bombsLeft.ToString();
+
         InitializeGame();
         RedrawGame();
     }
@@ -63,6 +69,8 @@ class MinesweeperGame : Form
             }
         }
     }
+
+    private ToolStripMenuItem BombsLeftDisplay;
 
     public void RedrawGame()
     {
@@ -90,6 +98,15 @@ class MinesweeperGame : Form
         Controls.Add(GameStrip);
 
         AddStripItem("Reset", () => { ResetGame(); });
+
+        BombsLeftDisplay = new ToolStripMenuItem()
+        {
+            Text = "9",
+            ForeColor = Color.Red,
+            Alignment = ToolStripItemAlignment.Right
+        };
+
+        GameStrip.Items.Add(BombsLeftDisplay);
 
         GameRenderer.Paint += OnPaint;
         GameRenderer.MouseClick += OnMouseClick;
@@ -148,9 +165,12 @@ class MinesweeperGame : Form
 
         if (e.Button == MouseButtons.Left)
         {
+            if (flagged[x, y] || revealed[x, y])
+                return; // its flagged so we dont want to check if theirs a bomb or not
+
             if (bombs[x, y])
             {
-                revealed[x, y] = true; // render red square where the bomb was
+                revealed[x, y] = true; // render bomb where its meant to be then redraw frame
                 RedrawGame();
 
                 MessageBox.Show("Game Over!");
@@ -164,6 +184,9 @@ class MinesweeperGame : Form
         }
         else if (e.Button == MouseButtons.Right)
         {
+            if (revealed[x, y])
+                return; // dont redraw/toggle when its been revealed
+
             ToggleFlag(x, y);
             RedrawGame();
         }
@@ -173,6 +196,9 @@ class MinesweeperGame : Form
     {
         if (x < 0 || x >= gridSizeX || y < 0 || y >= gridSizeY || revealed[x, y])
             return;
+
+        if (flagged[x, y])
+            ToggleFlag(x, y);
 
         revealed[x, y] = true;
 
@@ -193,7 +219,14 @@ class MinesweeperGame : Form
 
     private void ToggleFlag(int x, int y)
     {
+        if (revealed[x, y])
+            return; // dont flag spots that are already exposed
+
         flagged[x, y] = !flagged[x, y];
+
+        bombsLeft += flagged[x, y] ? -1 : 1;
+
+        BombsLeftDisplay.Text = bombsLeft.ToString();
     }
 
     private int CountAdjacentBombs(int x, int y)
