@@ -29,13 +29,13 @@ class MinesweeperGame : Form
 
     public void ResetGame()
     {
-        Size newWInSize = new Size(
-            (gridSizeX * cellSize) + 15,
-            (gridSizeY * cellSize) + GameStrip.Size.Height + cellSize + 8
+        Size newWinSize = new Size(
+            (int)((gridSizeX + 0.5f) * cellSize),
+            (int)(((gridSizeY + 1.2f) * cellSize) + GameStrip.Height)
         );
 
-        MinimumSize = newWInSize;
-        MaximumSize = newWInSize;
+        MinimumSize = newWinSize;
+        MaximumSize = newWinSize;
 
         bombs = new bool[gridSizeX, gridSizeY];
         revealed = new bool[gridSizeX, gridSizeY];
