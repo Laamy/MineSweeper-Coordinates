@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -11,9 +12,7 @@ class MinesweeperGame : Form
     private int gridSizeY = 10;
     private int bombCount = 9;
 
-    private bool[,] bombs;
-    private bool[,] revealed;
-    private bool[,] flagged;
+    private Tile[,] tiles;
 
     private int bombsLeft;
 
@@ -22,6 +21,10 @@ class MinesweeperGame : Form
 
     private Image flagImage = Minesweeper.Properties.Resources.flag;
     private Image bombImage = Minesweeper.Properties.Resources.bomb;
+
+    private ToolStripMenuItem BombsLeftDisplay;
+
+    private Level CustomLevel = new Level() { Bombs = 9, GridX = 10, GridY = 10 };
 
     public MinesweeperGame()
     {
@@ -39,13 +42,15 @@ class MinesweeperGame : Form
         MinimumSize = newWinSize;
         MaximumSize = newWinSize;
 
-        bombs = new bool[gridSizeX, gridSizeY];
-        revealed = new bool[gridSizeX, gridSizeY];
-        flagged = new bool[gridSizeX, gridSizeY];
+        tiles = new Tile[gridSizeX, gridSizeY];
 
-        Array.Clear(revealed, 0, revealed.Length);
-        Array.Clear(flagged, 0, flagged.Length);
-        Array.Clear(bombs, 0, bombs.Length);
+        for (int x = 0; x < gridSizeX; x++)
+        {
+            for (int y = 0; y < gridSizeY; y++)
+            {
+                tiles[x, y] = new Tile();
+            }
+        }
 
         bombsLeft = bombCount;
         BombsLeftDisplay.Text = bombsLeft.ToString();
@@ -54,24 +59,58 @@ class MinesweeperGame : Form
         RedrawGame();
     }
 
+    public void ForTiles(Action<int, int, Tile> action)
+    {
+        for (int x = 0; x < gridSizeX; x++)
+        {
+            for (int y = 0; y < gridSizeY; y++)
+            {
+                action(x, y, tiles[x, y]);
+            }
+        }
+    }
+
+    public Dictionary<Tuple<int, int>, Tile> GetTilesByProperty(Func<Tile, bool> propertyCondition)
+    {
+        Dictionary<Tuple<int, int>, Tile> conditionedTiles = new Dictionary<Tuple<int, int>, Tile>();
+
+        ForTiles((x, y, tile) =>
+        {
+            if (propertyCondition(tile)) // bomb
+            {
+                conditionedTiles.Add(new Tuple<int, int>(x, y), tile);
+            }
+        });
+
+        return conditionedTiles;
+    }
+
+    public Tuple<int, int> _Tuple(int x, int y)
+    {
+        return new Tuple<int, int>(x, y);
+    }
+
     private void InitializeGame()
     {
+        // NOTE: not optimized cuz i want to add modding support in an easy to interact way
+
         // Place bombs randomly
         Random random = new Random();
+
         for (int i = 0; i < bombCount;)
         {
             int x = random.Next(0, gridSizeX);
             int y = random.Next(0, gridSizeY);
 
-            if (!bombs[x, y])
+            Dictionary<Tuple<int, int>, Tile> bombs = GetTilesByProperty(tile => tile.Id == Tile.Bomb);
+
+            if (!bombs.ContainsKey(_Tuple(x, y)))
             {
-                bombs[x, y] = true;
+                tiles[x, y].Id = Tile.Bomb; // set the tile ID
                 i++;
             }
         }
     }
-
-    private ToolStripMenuItem BombsLeftDisplay;
 
     public void RedrawGame()
     {
@@ -122,6 +161,15 @@ class MinesweeperGame : Form
             AddStripItem(parent.DropDownItems, "Beginner", () => { SetLevel(MinesweeperLevels.Get().Beginner); });
             AddStripItem(parent.DropDownItems, "Intermediate", () => { SetLevel(MinesweeperLevels.Get().Intermediate); });
             AddStripItem(parent.DropDownItems, "Expert", () => { SetLevel(MinesweeperLevels.Get().Expert); });
+            
+            // Custom category
+            {
+                ToolStripMenuItem parent2 = new ToolStripMenuItem() { Text = "Custom.." };
+
+                AddStripItem(parent2.DropDownItems, "Set", () => { ResetGame(); });
+
+                parent.DropDownItems.Add(parent2);
+            }
 
             AddStripSplit(parent.DropDownItems);
             AddStripItem(parent.DropDownItems, "Exit", () => { Application.Exit(); });
@@ -146,41 +194,39 @@ class MinesweeperGame : Form
     private void OnPaint(object sender, PaintEventArgs e)
     {
         Graphics g = e.Graphics;
-        for (int x = 0; x < gridSizeX; x++)
-        {
-            for (int y = 0; y < gridSizeY; y++)
-            {
-                Rectangle cellRect = new Rectangle(x * cellSize, y * cellSize, cellSize, cellSize);
-                string coordinates = $"{x + 1}{(char)('A' + y)}";
 
-                if (revealed[x, y])
+        ForTiles((x, y, tile) =>
+        {
+            Rectangle cellRect = new Rectangle(x * cellSize, y * cellSize, cellSize, cellSize);
+            string coordinates = $"{x + 1}{(char)('A' + y)}";
+
+            if (tile.IsRevealed)
+            {
+                if (tile.Id == Tile.Bomb)
                 {
-                    if (bombs[x, y])
-                    {
-                        g.FillRectangle(Brushes.Red, cellRect);
-                        g.DrawImage(bombImage, cellRect);
-                    }
-                    else
-                    {
-                        int adjacentBombs = CountAdjacentBombs(x, y);
-                        if (adjacentBombs > 0)
-                            g.DrawString(adjacentBombs.ToString(), Font, Brushes.Black, cellRect);
-                    }
-                }
-                else if (flagged[x, y])
-                {
-                    g.FillRectangle(Brushes.Gray, cellRect);
-                    g.DrawImage(flagImage, cellRect);
+                    g.FillRectangle(Brushes.Red, cellRect);
+                    g.DrawImage(bombImage, cellRect);
                 }
                 else
                 {
-                    g.FillRectangle(new SolidBrush(Color.FromArgb(150, 150, 150)), cellRect);
-                    g.DrawString(coordinates, Font, Brushes.Black, cellRect, new StringFormat { LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Center });
+                    int adjacentBombs = CountAdjacentBombs(x, y);
+                    if (adjacentBombs > 0)
+                        g.DrawString(adjacentBombs.ToString(), Font, Brushes.Black, cellRect);
                 }
-
-                ControlPaint.DrawBorder(g, cellRect, Color.Black, ButtonBorderStyle.Solid);
             }
-        }
+            else if (tile.IsFlagged)
+            {
+                g.FillRectangle(Brushes.Gray, cellRect);
+                g.DrawImage(flagImage, cellRect);
+            }
+            else
+            {
+                g.FillRectangle(new SolidBrush(Color.FromArgb(150, 150, 150)), cellRect);
+                g.DrawString(coordinates, Font, Brushes.Black, cellRect, new StringFormat { LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Center });
+            }
+
+            ControlPaint.DrawBorder(g, cellRect, Color.Black, ButtonBorderStyle.Solid);
+        });
     }
 
     private void OnMouseClick(object sender, MouseEventArgs e)
@@ -194,14 +240,16 @@ class MinesweeperGame : Form
         if (x > gridSizeX - 1 || y > gridSizeY - 1)
             return;
 
+        Tile tile = tiles[x, y];
+
         if (e.Button == MouseButtons.Left)
         {
-            if (flagged[x, y] || revealed[x, y])
+            if (tile.IsFlagged || tile.IsRevealed)
                 return; // its flagged so we dont want to check if theirs a bomb or not
 
-            if (bombs[x, y])
+            if (tile.Id == Tile.Bomb)
             {
-                revealed[x, y] = true; // render bomb where its meant to be then redraw frame
+                tile.Reveal(); // render bomb where its meant to be then redraw frame
                 RedrawGame();
 
                 MessageBox.Show("Game Over!");
@@ -215,7 +263,7 @@ class MinesweeperGame : Form
         }
         else if (e.Button == MouseButtons.Right)
         {
-            if (revealed[x, y])
+            if (tile.IsRevealed)
                 return; // dont redraw/toggle when its been revealed
 
             ToggleFlag(x, y);
@@ -225,13 +273,15 @@ class MinesweeperGame : Form
 
     private void RevealEmptySquares(int x, int y)
     {
-        if (x < 0 || x >= gridSizeX || y < 0 || y >= gridSizeY || revealed[x, y])
+        if (x < 0 || x >= gridSizeX || y < 0 || y >= gridSizeY || tiles[x, y].IsRevealed)
             return;
 
-        if (flagged[x, y])
+        Tile tile = tiles[x, y];
+
+        if (tile.IsFlagged)
             ToggleFlag(x, y);
 
-        revealed[x, y] = true;
+        tile.Reveal();
 
         if (CountAdjacentBombs(x, y) == 0)
         {
@@ -250,12 +300,14 @@ class MinesweeperGame : Form
 
     private void ToggleFlag(int x, int y)
     {
-        if (revealed[x, y])
+        Tile tile = tiles[x, y];
+
+        if (tile.IsRevealed)
             return; // dont flag spots that are already exposed
 
-        flagged[x, y] = !flagged[x, y];
+        tile.Flag(!tile.IsFlagged);
 
-        bombsLeft += flagged[x, y] ? -1 : 1;
+        bombsLeft += tile.IsFlagged ? -1 : 1;
 
         BombsLeftDisplay.Text = bombsLeft.ToString();
     }
@@ -270,7 +322,7 @@ class MinesweeperGame : Form
                 int newX = x + i;
                 int newY = y + j;
 
-                if (newX >= 0 && newX < gridSizeX && newY >= 0 && newY < gridSizeY && bombs[newX, newY])
+                if (newX >= 0 && newX < gridSizeX && newY >= 0 && newY < gridSizeY && tiles[newX, newY].Id == Tile.Bomb)
                     count++;
             }
         }
