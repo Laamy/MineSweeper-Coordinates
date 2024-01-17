@@ -21,6 +21,8 @@ class MinesweeperGame : Form
     {
         InitializeUI();
         ResetGame();
+
+        PluginManager.InitPlugins();
     }
 
     public void ResetGame()

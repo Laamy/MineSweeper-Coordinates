@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
 
-class TileUtils
+public class TileUtils
 {
     public static int CountAdjacentBombs(int x, int y)
     {

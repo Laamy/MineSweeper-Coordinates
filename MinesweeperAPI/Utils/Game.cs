@@ -1,4 +1,4 @@
-﻿class Game
+﻿public class Game
 {
     public const int CellSize = 30;
     public static int GridX = 10;

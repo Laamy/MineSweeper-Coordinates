@@ -1,4 +1,4 @@
-﻿class MinesweeperLevels
+﻿public class MinesweeperLevels
 {
     public Level Beginner;
     public Level Intermediate;

@@ -1,4 +1,4 @@
-﻿class Level
+﻿public class Level
 {
     public int Bombs;
     public int GridX;
