@@ -1,11 +1,4 @@
-﻿class Level
-{
-    public int Bombs;
-    public int GridX;
-    public int GridY;
-}
-
-class MinesweeperLevels
+﻿class MinesweeperLevels
 {
     public Level Beginner;
     public Level Intermediate;

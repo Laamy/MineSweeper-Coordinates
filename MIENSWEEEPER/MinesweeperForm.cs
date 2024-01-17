@@ -7,15 +7,6 @@ using Image = System.Drawing.Image;
 
 class MinesweeperGame : Form
 {
-    private const int cellSize = 30;
-    private int gridSizeX = 10;
-    private int gridSizeY = 10;
-    private int bombCount = 9;
-
-    private Tile[,] tiles;
-
-    private int bombsLeft;
-
     private Panel GameRenderer;
     private MenuStrip GameStrip;
 
@@ -35,25 +26,25 @@ class MinesweeperGame : Form
     public void ResetGame()
     {
         Size newWinSize = new Size(
-            (int)((gridSizeX + 0.5f) * cellSize),
-            (int)(((gridSizeY + 1.2f) * cellSize) + GameStrip.Height)
+            (int)((Game.GridX + 0.5f) * Game.CellSize),
+            (int)(((Game.GridY + 1.2f) * Game.CellSize) + GameStrip.Height)
         );
 
         MinimumSize = newWinSize;
         MaximumSize = newWinSize;
 
-        tiles = new Tile[gridSizeX, gridSizeY];
+        Game.Tiles = new Tile[Game.GridX, Game.GridY];
 
-        for (int x = 0; x < gridSizeX; x++)
+        for (int x = 0; x < Game.GridX; x++)
         {
-            for (int y = 0; y < gridSizeY; y++)
+            for (int y = 0; y < Game.GridY; y++)
             {
-                tiles[x, y] = new Tile();
+                Game.Tiles[x, y] = new Tile();
             }
         }
 
-        bombsLeft = bombCount;
-        BombsLeftDisplay.Text = bombsLeft.ToString();
+        Game.BombsLeft = Game.BombCount;
+        BombsLeftDisplay.Text = Game.BombsLeft.ToString();
 
         InitializeGame();
         RedrawGame();
@@ -61,11 +52,11 @@ class MinesweeperGame : Form
 
     public void ForTiles(Action<int, int, Tile> action)
     {
-        for (int x = 0; x < gridSizeX; x++)
+        for (int x = 0; x < Game.GridX; x++)
         {
-            for (int y = 0; y < gridSizeY; y++)
+            for (int y = 0; y < Game.GridY; y++)
             {
-                action(x, y, tiles[x, y]);
+                action(x, y, Game.Tiles[x, y]);
             }
         }
     }
@@ -97,16 +88,16 @@ class MinesweeperGame : Form
         // Place bombs randomly
         Random random = new Random();
 
-        for (int i = 0; i < bombCount;)
+        for (int i = 0; i < Game.BombCount;)
         {
-            int x = random.Next(0, gridSizeX);
-            int y = random.Next(0, gridSizeY);
+            int x = random.Next(0, Game.GridX);
+            int y = random.Next(0, Game.GridY);
 
             Dictionary<Tuple<int, int>, Tile> bombs = GetTilesByProperty(tile => tile.Id == Tile.Bomb);
 
             if (!bombs.ContainsKey(_Tuple(x, y)))
             {
-                tiles[x, y].Id = Tile.Bomb; // set the tile ID
+                Game.Tiles[x, y].Id = Tile.Bomb; // set the tile ID
                 i++;
             }
         }
@@ -133,9 +124,9 @@ class MinesweeperGame : Form
 
     public void SetLevel(Level level)
     {
-        bombCount = level.Bombs;
-        gridSizeX = level.GridX;
-        gridSizeY = level.GridY;
+        Game.BombCount = level.Bombs;
+        Game.GridX = level.GridX;
+        Game.GridY = level.GridY;
 
         ResetGame();
     }
@@ -197,7 +188,7 @@ class MinesweeperGame : Form
 
         ForTiles((x, y, tile) =>
         {
-            Rectangle cellRect = new Rectangle(x * cellSize, y * cellSize, cellSize, cellSize);
+            Rectangle cellRect = new Rectangle(x * Game.CellSize, y * Game.CellSize, Game.CellSize, Game.CellSize);
             string coordinates = $"{x + 1}{(char)('A' + y)}";
 
             if (tile.IsRevealed)
@@ -209,7 +200,7 @@ class MinesweeperGame : Form
                 }
                 else
                 {
-                    int adjacentBombs = CountAdjacentBombs(x, y);
+                    int adjacentBombs = TileUtils.CountAdjacentBombs(x, y);
                     if (adjacentBombs > 0)
                         g.DrawString(adjacentBombs.ToString(), Font, Brushes.Black, cellRect);
                 }
@@ -231,16 +222,16 @@ class MinesweeperGame : Form
 
     private void OnMouseClick(object sender, MouseEventArgs e)
     {
-        int x = e.X / cellSize;
-        int y = e.Y / cellSize;
+        int x = e.X / Game.CellSize;
+        int y = e.Y / Game.CellSize;
 
         if (x < 0 || y < 0)
             return;
 
-        if (x > gridSizeX - 1 || y > gridSizeY - 1)
+        if (x > Game.GridX - 1 || y > Game.GridY - 1)
             return;
 
-        Tile tile = tiles[x, y];
+        Tile tile = Game.Tiles[x, y];
 
         if (e.Button == MouseButtons.Left)
         {
@@ -257,7 +248,7 @@ class MinesweeperGame : Form
             }
             else
             {
-                RevealEmptySquares(x, y);
+                TileUtils.RevealEmptySquares(BombsLeftDisplay, x, y);
                 RedrawGame();
             }
         }
@@ -266,66 +257,8 @@ class MinesweeperGame : Form
             if (tile.IsRevealed)
                 return; // dont redraw/toggle when its been revealed
 
-            ToggleFlag(x, y);
+            TileUtils.ToggleFlag(BombsLeftDisplay, x, y);
             RedrawGame();
         }
-    }
-
-    private void RevealEmptySquares(int x, int y)
-    {
-        if (x < 0 || x >= gridSizeX || y < 0 || y >= gridSizeY || tiles[x, y].IsRevealed)
-            return;
-
-        Tile tile = tiles[x, y];
-
-        if (tile.IsFlagged)
-            ToggleFlag(x, y);
-
-        tile.Reveal();
-
-        if (CountAdjacentBombs(x, y) == 0)
-        {
-            for (int i = -1; i <= 1; i++)
-            {
-                for (int j = -1; j <= 1; j++)
-                {
-                    int newX = x + i;
-                    int newY = y + j;
-
-                    RevealEmptySquares(newX, newY);
-                }
-            }
-        }
-    }
-
-    private void ToggleFlag(int x, int y)
-    {
-        Tile tile = tiles[x, y];
-
-        if (tile.IsRevealed)
-            return; // dont flag spots that are already exposed
-
-        tile.Flag(!tile.IsFlagged);
-
-        bombsLeft += tile.IsFlagged ? -1 : 1;
-
-        BombsLeftDisplay.Text = bombsLeft.ToString();
-    }
-
-    private int CountAdjacentBombs(int x, int y)
-    {
-        int count = 0;
-        for (int i = -1; i <= 1; i++)
-        {
-            for (int j = -1; j <= 1; j++)
-            {
-                int newX = x + i;
-                int newY = y + j;
-
-                if (newX >= 0 && newX < gridSizeX && newY >= 0 && newY < gridSizeY && tiles[newX, newY].Id == Tile.Bomb)
-                    count++;
-            }
-        }
-        return count;
     }
 }
