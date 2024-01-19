@@ -20,7 +20,7 @@ class PluginManager
     public static void InitPlugins()
     {
         // debug path
-        string dynamicPluginsFolderPath = "C:\\Users\\Yeemi\\source\\repos\\MIENSWEEEPER\\MIENSWEEEPER\\Plugins"; //Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
+        string dynamicPluginsFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
 
         if (Directory.Exists(dynamicPluginsFolderPath))
         {
