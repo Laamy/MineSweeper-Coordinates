@@ -1,8 +1,11 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Windows.Forms;
 
-public interface IPluginInterface
+public interface IPluginInterface : IDisposable
 {
     Form GetWin();
 
     void Log(string message);
+
+    void RedrawGame();
 }

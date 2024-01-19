@@ -1,15 +1,21 @@
 ﻿using System;
 using System.Drawing;
+using System.Linq;
 
 public class NoBombPowerup : Plugin
 {
-    public static int BombPowerups = 3;
+    public static int BombPowerups = 1;
 
     public const int NoBombs = 2;
 
     public override void Initialize()
     {
         PluginTunnel.Log("Loaded plugin " + Name + " on API version " + API.Version);
+    }
+
+    public override void Dispose()
+    {
+        base.Dispose();
     }
 
     public override void OnGameStart()
@@ -30,6 +36,21 @@ public class NoBombPowerup : Plugin
                 //Game.Tiles[x, y].IsRevealed = true;
                 i++;
             }
+        }
+    }
+
+    public override void OnTileClicked(Tuple<int, int> clicked, Tile _tile)
+    {
+        if (_tile.Id == NoBombs)
+        {
+            PluginTunnel.Log("nobomb spot pressed");
+
+            _tile.Id = Tile.Empty; // remove powerup
+
+            TileUtils.GetFirst(tile => tile.Id == Tile.Bomb).Id = Tile.Empty; // remove bomb
+            Game.BombsLeft--;
+
+            PluginTunnel.RedrawGame();
         }
     }
 

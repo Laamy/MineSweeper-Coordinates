@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
 
-public abstract class Plugin
+public abstract class Plugin : IDisposable
 {
     private string _name;
     public IPluginInterface PluginTunnel { get; private set; }
@@ -27,8 +27,13 @@ public abstract class Plugin
 
     public virtual void OnTileRightClicked(Tuple<int, int> clicked, Tile tile) { }
 
-    public virtual void OnTileRender(Graphics g, int x, int y, Tile tile, ref bool cancel)
+    public virtual void OnTileRender(Graphics g, int x, int y, Tile tile, ref bool cancel) { }
+
+    public virtual void Dispose()
     {
-        //*cancel = *cancel;
+        _name = null;
+
+        PluginTunnel.Dispose();
+        PluginTunnel = null;
     }
 }

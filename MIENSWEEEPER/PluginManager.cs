@@ -19,7 +19,8 @@ class PluginManager
 
     public static void InitPlugins()
     {
-        string dynamicPluginsFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
+        // debug path
+        string dynamicPluginsFolderPath = "C:\\Users\\Yeemi\\source\\repos\\MIENSWEEEPER\\MIENSWEEEPER\\Plugins"; //Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
 
         if (Directory.Exists(dynamicPluginsFolderPath))
         {
@@ -36,7 +37,7 @@ class PluginManager
                             GenerateInMemory = true,
                             GenerateExecutable = false,
                             
-                            ReferencedAssemblies = { "MinesweeperAPI.dll", "System.dll", "System.Drawing.dll", "System.Windows.Forms.dll" }
+                            ReferencedAssemblies = { "MinesweeperAPI.dll", "System.dll", "System.Linq.dll", "System.Drawing.dll", "System.Windows.Forms.dll" }
                         };
 
                         CompilerResults compilerResults = codeProvider.CompileAssemblyFromFile(compilerParameters, csFile);

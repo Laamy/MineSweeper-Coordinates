@@ -19,4 +19,14 @@ public class PluginTunnel : IPluginInterface
     {
         return MinesweeperGame.Instance;
     }
+
+    public void Dispose()
+    {
+        plugName = null;
+    }
+
+    public void RedrawGame()
+    {
+        MinesweeperGame.Instance.RedrawGame();
+    }
 }

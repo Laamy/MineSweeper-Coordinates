@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 class MinesweeperGame : Form
 {
@@ -134,6 +135,20 @@ class MinesweeperGame : Form
 
             AddStripSplit(parent.DropDownItems);
             AddStripItem(parent.DropDownItems, "Exit", () => { Application.Exit(); });
+
+            GameStrip.Items.Add(parent);
+        }
+
+        // file category
+        {
+            ToolStripMenuItem parent = new ToolStripMenuItem() { Text = "Debug" };
+
+            AddStripItem(parent.DropDownItems, "Reload", () => {
+                PluginManager.Foreach((plugin) => plugin.Dispose());
+                PluginManager.plugins = new List<Plugin>();
+
+                PluginManager.InitPlugins();
+            });
 
             GameStrip.Items.Add(parent);
         }

@@ -21,6 +21,41 @@ public class TileUtils
         return count;
     }
 
+    public static int CountAdjacentObjects(int x, int y)
+    {
+        int count = 0;
+        for (int i = -1; i <= 1; i++)
+        {
+            for (int j = -1; j <= 1; j++)
+            {
+                int newX = x + i;
+                int newY = y + j;
+
+                if (newX >= 0 && newX < Game.GridX && newY >= 0 && newY < Game.GridY && Game.Tiles[newX, newY].Id != Tile.Empty)
+                    count++;
+            }
+        }
+        return count;
+    }
+
+    public static Tile GetFirst(Func<Tile, bool> propertyCondition)
+    {
+        for (int x = 0; x < Game.GridX; x++)
+        {
+            for (int y = 0; y < Game.GridY; y++)
+            {
+                Tile tile = Game.Tiles[x, y];
+
+                if (propertyCondition(tile))
+                {
+                    return tile;
+                }
+            }
+        }
+
+        return null;
+    }
+
     public static void ForTiles(Action<int, int, Tile> action)
     {
         for (int x = 0; x < Game.GridX; x++)

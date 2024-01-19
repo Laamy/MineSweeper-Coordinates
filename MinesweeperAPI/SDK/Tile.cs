@@ -12,7 +12,7 @@ public class Tile
     public void Flag(bool value) => IsFlagged = value;
 
     public const int Bomb = 1; // ID's
-    public const int Empty = 1;
+    public const int Empty = 0;
 
     public static Image flagImage = MinesweeperAPI.Properties.Resources.flag;
     public static Image bombImage = MinesweeperAPI.Properties.Resources.bomb;
