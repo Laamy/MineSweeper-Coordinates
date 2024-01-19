@@ -3,15 +3,12 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
-using Image = System.Drawing.Image;
-
 class MinesweeperGame : Form
 {
+    public static MinesweeperGame Instance;
+
     private Panel GameRenderer;
     private MenuStrip GameStrip;
-
-    private Image flagImage = Minesweeper.Properties.Resources.flag;
-    private Image bombImage = Minesweeper.Properties.Resources.bomb;
 
     private ToolStripMenuItem BombsLeftDisplay;
 
@@ -19,6 +16,8 @@ class MinesweeperGame : Form
 
     public MinesweeperGame()
     {
+        Instance = this;
+
         InitializeUI();
         ResetGame();
 
@@ -50,43 +49,12 @@ class MinesweeperGame : Form
 
         InitializeGame();
         RedrawGame();
-    }
 
-    public void ForTiles(Action<int, int, Tile> action)
-    {
-        for (int x = 0; x < Game.GridX; x++)
-        {
-            for (int y = 0; y < Game.GridY; y++)
-            {
-                action(x, y, Game.Tiles[x, y]);
-            }
-        }
-    }
-
-    public Dictionary<Tuple<int, int>, Tile> GetTilesByProperty(Func<Tile, bool> propertyCondition)
-    {
-        Dictionary<Tuple<int, int>, Tile> conditionedTiles = new Dictionary<Tuple<int, int>, Tile>();
-
-        ForTiles((x, y, tile) =>
-        {
-            if (propertyCondition(tile)) // bomb
-            {
-                conditionedTiles.Add(new Tuple<int, int>(x, y), tile);
-            }
-        });
-
-        return conditionedTiles;
-    }
-
-    public Tuple<int, int> _Tuple(int x, int y)
-    {
-        return new Tuple<int, int>(x, y);
+        PluginManager.Foreach(plugin => plugin.OnGameStart());
     }
 
     private void InitializeGame()
     {
-        // NOTE: not optimized cuz i want to add modding support in an easy to interact way
-
         // Place bombs randomly
         Random random = new Random();
 
@@ -95,9 +63,9 @@ class MinesweeperGame : Form
             int x = random.Next(0, Game.GridX);
             int y = random.Next(0, Game.GridY);
 
-            Dictionary<Tuple<int, int>, Tile> bombs = GetTilesByProperty(tile => tile.Id == Tile.Bomb);
+            Dictionary<Tuple<int, int>, Tile> bombs = TileUtils.GetTilesByProperty(tile => tile.Id == Tile.Bomb);
 
-            if (!bombs.ContainsKey(_Tuple(x, y)))
+            if (!bombs.ContainsKey(TileUtils.Tuple(x, y)))
             {
                 Game.Tiles[x, y].Id = Tile.Bomb; // set the tile ID
                 i++;
@@ -154,7 +122,7 @@ class MinesweeperGame : Form
             AddStripItem(parent.DropDownItems, "Beginner", () => { SetLevel(MinesweeperLevels.Get().Beginner); });
             AddStripItem(parent.DropDownItems, "Intermediate", () => { SetLevel(MinesweeperLevels.Get().Intermediate); });
             AddStripItem(parent.DropDownItems, "Expert", () => { SetLevel(MinesweeperLevels.Get().Expert); });
-            
+
             // Custom category
             {
                 ToolStripMenuItem parent2 = new ToolStripMenuItem() { Text = "Custom.." };
@@ -188,37 +156,32 @@ class MinesweeperGame : Form
     {
         Graphics g = e.Graphics;
 
-        ForTiles((x, y, tile) =>
+        TileUtils.ForTiles((x, y, tile) =>
         {
-            Rectangle cellRect = new Rectangle(x * Game.CellSize, y * Game.CellSize, Game.CellSize, Game.CellSize);
-            string coordinates = $"{x + 1}{(char)('A' + y)}";
+            bool cancel = false;
 
-            if (tile.IsRevealed)
+            PluginManager.Foreach(plugin => plugin.OnTileRender(g, x, y, tile, ref cancel));
+
+            if (!cancel)
             {
-                if (tile.Id == Tile.Bomb)
+                Rectangle cellRect = new Rectangle(x * Game.CellSize, y * Game.CellSize, Game.CellSize, Game.CellSize);
+                string coordinates = $"{x + 1}{(char)('A' + y)}";
+
+                if (tile.IsRevealed)
                 {
-                    g.FillRectangle(Brushes.Red, cellRect);
-                    g.DrawImage(bombImage, cellRect);
+                    Tile.DrawRevealed(g, Font, tile, TileUtils.Tuple(x, y), cellRect);
+                }
+                else if (tile.IsFlagged)
+                {
+                    Tile.DrawFlag(g, cellRect);
                 }
                 else
                 {
-                    int adjacentBombs = TileUtils.CountAdjacentBombs(x, y);
-                    if (adjacentBombs > 0)
-                        g.DrawString(adjacentBombs.ToString(), Font, Brushes.Black, cellRect);
+                    Tile.DrawHidden(g, Font, cellRect, coordinates);
                 }
-            }
-            else if (tile.IsFlagged)
-            {
-                g.FillRectangle(Brushes.Gray, cellRect);
-                g.DrawImage(flagImage, cellRect);
-            }
-            else
-            {
-                g.FillRectangle(new SolidBrush(Color.FromArgb(150, 150, 150)), cellRect);
-                g.DrawString(coordinates, Font, Brushes.Black, cellRect, new StringFormat { LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Center });
-            }
 
-            ControlPaint.DrawBorder(g, cellRect, Color.Black, ButtonBorderStyle.Solid);
+                Tile.DrawBorder(g, cellRect);
+            }
         });
     }
 
@@ -237,6 +200,8 @@ class MinesweeperGame : Form
 
         if (e.Button == MouseButtons.Left)
         {
+            PluginManager.Foreach(plugin => plugin.OnTileClicked(new Tuple<int, int>(x, y), tile));
+
             if (tile.IsFlagged || tile.IsRevealed)
                 return; // its flagged so we dont want to check if theirs a bomb or not
 
@@ -245,7 +210,10 @@ class MinesweeperGame : Form
                 tile.Reveal(); // render bomb where its meant to be then redraw frame
                 RedrawGame();
 
+                PluginManager.Foreach(plugin => plugin.OnGameEnd());
+
                 MessageBox.Show("Game Over!");
+
                 ResetGame();
             }
             else
@@ -256,6 +224,8 @@ class MinesweeperGame : Form
         }
         else if (e.Button == MouseButtons.Right)
         {
+            PluginManager.Foreach(plugin => plugin.OnTileRightClicked(new Tuple<int, int>(x, y), tile));
+
             if (tile.IsRevealed)
                 return; // dont redraw/toggle when its been revealed
 

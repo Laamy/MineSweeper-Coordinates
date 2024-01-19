@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Drawing;
 
 public abstract class Plugin
 {
     private string _name;
-    protected IPluginInterface PluginTunnel;
+    public IPluginInterface PluginTunnel { get; private set; }
 
     public Plugin() { }
 
-    public string Name { get { return _name; } }
+    public string Name
+    { get => _name; }
 
     public void SetTunnel(IPluginInterface Logger, string name)
     {
@@ -25,8 +27,8 @@ public abstract class Plugin
 
     public virtual void OnTileRightClicked(Tuple<int, int> clicked, Tile tile) { }
 
-    public void SetTunnel(object value)
+    public virtual void OnTileRender(Graphics g, int x, int y, Tile tile, ref bool cancel)
     {
-        throw new NotImplementedException();
+        //*cancel = *cancel;
     }
 }

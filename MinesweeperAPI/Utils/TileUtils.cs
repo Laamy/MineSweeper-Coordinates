@@ -1,4 +1,6 @@
-﻿using System.Windows.Forms;
+﻿using System.Collections.Generic;
+using System;
+using System.Windows.Forms;
 
 public class TileUtils
 {
@@ -17,6 +19,37 @@ public class TileUtils
             }
         }
         return count;
+    }
+
+    public static void ForTiles(Action<int, int, Tile> action)
+    {
+        for (int x = 0; x < Game.GridX; x++)
+        {
+            for (int y = 0; y < Game.GridY; y++)
+            {
+                action(x, y, Game.Tiles[x, y]);
+            }
+        }
+    }
+
+    public static Dictionary<Tuple<int, int>, Tile> GetTilesByProperty(Func<Tile, bool> propertyCondition)
+    {
+        Dictionary<Tuple<int, int>, Tile> conditionedTiles = new Dictionary<Tuple<int, int>, Tile>();
+
+        ForTiles((x, y, tile) =>
+        {
+            if (propertyCondition(tile)) // bomb
+            {
+                conditionedTiles.Add(new Tuple<int, int>(x, y), tile);
+            }
+        });
+
+        return conditionedTiles;
+    }
+
+    public static Tuple<int, int> Tuple(int x, int y)
+    {
+        return new Tuple<int, int>(x, y);
     }
 
     public static void RevealEmptySquares(ToolStripMenuItem display, int x, int y)

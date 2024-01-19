@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -31,6 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MinesweeperAPI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -46,9 +48,9 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="PluginManager.cs" />
-    <None Include="Plugins\NoBombPowerup.cs">
+    <Compile Include="Plugins\NoBombPowerup.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Compile>
     <Compile Include="PluginTunnel.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

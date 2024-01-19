@@ -14,4 +14,9 @@ public class PluginTunnel : IPluginInterface
     {
         Console.WriteLine($"[{plugName}] {message}");
     }
+
+    public Form GetWin()
+    {
+        return MinesweeperGame.Instance;
+    }
 }

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Minesweeper", "MIENSWEEEPER
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinesweeperAPI", "MinesweeperAPI\MinesweeperAPI.csproj", "{70BFFC60-FF82-4E88-A009-FFBBF5753282}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{CB766D3C-656B-4238-A6D0-94EC8259A9DD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,6 +26,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{70BFFC60-FF82-4E88-A009-FFBBF5753282} = {CB766D3C-656B-4238-A6D0-94EC8259A9DD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AFDA9BC3-F755-4B69-B593-FD06DF3AAA5C}
