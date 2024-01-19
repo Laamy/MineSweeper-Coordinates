@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Linq;
 
 public class NoBombPowerup : Plugin
 {
@@ -43,8 +42,6 @@ public class NoBombPowerup : Plugin
     {
         if (_tile.Id == NoBombs)
         {
-            PluginTunnel.Log("nobomb spot pressed");
-
             _tile.Id = Tile.Empty; // remove powerup
 
             TileUtils.GetFirst(tile => tile.Id == Tile.Bomb).Id = Tile.Empty; // remove bomb
